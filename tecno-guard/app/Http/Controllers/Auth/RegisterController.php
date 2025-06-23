@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ValidatorEmail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 
 class RegisterController extends Controller
 {
@@ -26,20 +27,54 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $validate = Validator::make(
-            $request->all(),[
+            $request->all(),
+            [
                 "name" => "required|max:30",
                 "email" => "required|unique:users|email",
                 "password" => "required|min:8|string",
                 "phone" => "required|string|max:15",
-                "direccion" => "required|string|max:255"
+                "ine_front" => "required|image"
             ]
         );
 
-        if($validate->fails())
-        {
+        if ($validate->fails()) {
             return back()
                 ->withErrors($validate)
-                ->withInput($request->except('password'));
+                ->withInput($request->except(['password', 'ine_front']));
+        }
+
+        $image = $request->file('ine_front');
+        $mimeType = $image->getMimeType();
+        $base64Image = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+
+        $apiKey = env('VERIFICAMEX_API_KEY');
+
+        $response = Http::withToken($apiKey)->post('https://api.verificamex.com/identity/v1/ocr/obverse', [
+            'ine_front' => $base64Image,
+        ]);
+
+        $address = '';
+        if ($response->successful()) {
+            $apiResponse = $response->json();
+            $parseOcr = $apiResponse['data']['parse_ocr'] ?? [];
+            $addressData = collect($parseOcr)->firstWhere('type', 'PermanentAddress');
+
+            if ($addressData && isset($addressData['value'])) {
+                $address = $addressData['value'];
+            } else {
+                return back()
+                    ->withErrors(['ine_front' => 'No se pudo encontrar la dirección en la imagen.'])
+                    ->withInput($request->except(['password', 'ine_front']));
+            }
+        } else {
+            $errorMessage = 'Error al procesar la imagen de la INE. Intente de nuevo.';
+            $apiError = $response->json();
+            if ($apiError && isset($apiError['message'])) {
+                $errorMessage .= ' Detalle: ' . $apiError['message'];
+            }
+            return back()
+                ->withErrors(['ine_front' => $errorMessage])
+                ->withInput($request->except(['password', 'ine_front']));
         }
 
         $user = new User();
@@ -49,7 +84,7 @@ class RegisterController extends Controller
         $user->is_active = false;
         $user->password = Hash::make($request->password);
         $user->phone = $request->phone;
-        $user->direccion = $request->direccion;
+        $user->direccion = $address;
         $user->save();
 
         $signedroute = URL::temporarySignedRoute(

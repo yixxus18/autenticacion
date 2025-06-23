@@ -12,7 +12,7 @@
                         </div>
 
                         <div class="card-body p-4">
-                            <form method="POST" action="{{ route('register') }}">
+                            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                                 @csrf
 
                                 <div class="mb-3">
@@ -76,11 +76,10 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="direccion" class="form-label">{{ __('Dirección') }}</label>
+                                    <label for="ine_front" class="form-label">{{ __('Foto de INE (Frente)') }}</label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                        <input id="direccion" type="text" class="form-control @error('direccion') is-invalid @enderror" name="direccion" value="{{ old('direccion') }}" required placeholder="Av. Ejemplo 123">
-                                        @error('direccion')
+                                        <input id="ine_front" type="file" class="form-control @error('ine_front') is-invalid @enderror" name="ine_front" required>
+                                        @error('ine_front')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
@@ -114,7 +113,7 @@
                 <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-4">
                     <img src="{{ asset('images/tecno-guard-logo.png') }}" alt="Tecno Guard Logo" class="img-fluid mb-4" style="max-width: 300px;">
                     <div class="card p-3 text-center border-0 shadow-sm">
-                        <p class="mb-0 text-muted">La Dirección debe coincidir con la proporcionada en su INE</p>
+                        <p class="mb-0 text-muted">Asegúrate que la imagen de tu INE sea clara.</p>
                         <p class="mb-0 text-muted mt-2">La autenticación de dos factores es obligatoria para mayor seguridad</p>
                     </div>
                 </div>
