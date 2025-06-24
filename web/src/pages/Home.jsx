@@ -16,7 +16,7 @@ const Home = () => {
 
   const fetchHealthData = async () => {
     try {
-      const response = await fetch(`http://localhost:8001/health`, {
+      const response = await fetch(`http://localhost:8001/api/health`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -38,7 +38,7 @@ const Home = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8001/me`, {
+      const response = await fetch(`http://localhost:8000/api/user`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -46,6 +46,7 @@ const Home = () => {
         },
       });
       const data = await response.json();
+      console.log(accessToken);
       setMeResponse({ status: response.status, data: data });
     } catch (error) {
       console.error('Error al obtener datos de /me:', error);
@@ -71,7 +72,6 @@ const Home = () => {
         body: JSON.stringify({
           nombre: 'Cerrada de Prueba',
           direccion: 'Dirección de prueba',
-          // Agrega más campos según necesites
         }),
       });
       const data = await response.json();
