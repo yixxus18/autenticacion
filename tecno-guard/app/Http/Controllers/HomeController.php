@@ -11,8 +11,13 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $redirectUrl = $request->input('redirect_uri') ?? session('redirect_uri');
+        if ($redirectUrl) {
+            session()->forget('redirect_uri');
+            return redirect($redirectUrl);
+        }
         return view('home');
     }
 }

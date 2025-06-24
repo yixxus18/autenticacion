@@ -17,10 +17,9 @@
 
                                 <div class="mb-3">
                                     <label for="email" class="form-label">{{ __('Email') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="example@gmail.com">
-
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/mail_icon_black.svg') }}" alt="icono email" style="width:22px;height:22px;"></span>
+                                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror border-start-0" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="example@gmail.com">
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -31,10 +30,9 @@
 
                                 <div class="mb-3">
                                     <label for="password" class="form-label">{{ __('Contraseña') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="***********">
-
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/key_icon_black.svg') }}" alt="icono contraseña" style="width:22px;height:22px;"></span>
+                                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror border-start-0" name="password" required autocomplete="current-password" placeholder="***********">
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>

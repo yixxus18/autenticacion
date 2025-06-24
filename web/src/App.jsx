@@ -141,7 +141,7 @@ function App() {
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <img src={logo} alt="Logo TecnoGuard" style={{ maxWidth: '300px', marginBottom: '20px' }} /> 
+        <img src={logo} alt="Logo TecnoGuard" style={{ maxWidth: '300px', marginBottom: '20px' }} /> @
       </div>
     </div>
   )

@@ -17,9 +17,9 @@
 
                                 <div class="mb-3">
                                     <label for="name" class="form-label">{{ __('Nombre Completo') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus placeholder="Juan Pérez">
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/account_circle_icon_black.svg') }}" alt="icono nombre" style="width:22px;height:22px;"></span>
+                                        <input id="name" type="text" class="form-control @error('name') is-invalid @enderror border-start-0" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus placeholder="Juan Pérez">
                                         @error('name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -30,9 +30,9 @@
 
                                 <div class="mb-3">
                                     <label for="email" class="form-label">{{ __('Email') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="example@gmail.com">
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/mail_icon_black.svg') }}" alt="icono email" style="width:22px;height:22px;"></span>
+                                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror border-start-0" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="example@gmail.com">
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -43,9 +43,9 @@
 
                                 <div class="mb-3">
                                     <label for="password" class="form-label">{{ __('Contraseña') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="***********">
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/key_icon_black.svg') }}" alt="icono contraseña" style="width:22px;height:22px;"></span>
+                                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror border-start-0" name="password" required autocomplete="new-password" placeholder="***********">
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -56,17 +56,17 @@
 
                                 <div class="mb-3">
                                     <label for="password-confirm" class="form-label">{{ __('Confirmar Contraseña') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" placeholder="***********">
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/key_icon_black.svg') }}" alt="icono confirmar contraseña" style="width:22px;height:22px;"></span>
+                                        <input id="password-confirm" type="password" class="form-control border-start-0" name="password_confirmation" required autocomplete="new-password" placeholder="***********">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="phone" class="form-label">{{ __('Teléfono') }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                        <input id="phone" type="tel" class="form-control @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="5555555555">
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/phone_icon_black.svg') }}" alt="icono teléfono" style="width:22px;height:22px;"></span>
+                                        <input id="phone" type="tel" class="form-control @error('phone') is-invalid @enderror border-start-0" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="5555555555">
                                         @error('phone')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -77,8 +77,9 @@
 
                                 <div class="mb-4">
                                     <label for="ine_front" class="form-label">{{ __('Foto de INE (Frente)') }}</label>
-                                    <div class="input-group">
-                                        <input id="ine_front" type="file" class="form-control @error('ine_front') is-invalid @enderror" name="ine_front" required>
+                                    <div class="input-group custom-input-icon">
+                                        <span class="input-group-text bg-white border-end-0 p-0 ps-2 pe-1"><img src="{{ asset('images/black/camera_icon_black.svg') }}" alt="icono INE" style="width:22px;height:22px;"></span>
+                                        <input id="ine_front" type="file" class="form-control @error('ine_front') is-invalid @enderror border-start-0" name="ine_front" required>
                                         @error('ine_front')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -101,7 +102,7 @@
                                     <button type="submit" class="btn btn-primary btn-lg">
                                         {{ __('Registrarse') }}
                                     </button>
-                                    <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg">
+                                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
                                         {{ __('Iniciar Sesión') }}
                                     </a>
                                 </div>
