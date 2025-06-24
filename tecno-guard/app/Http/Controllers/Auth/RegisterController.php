@@ -80,7 +80,7 @@ class RegisterController extends Controller
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->role_id = 3;
+        $user->role_id = 4;
         $user->is_active = false;
         $user->password = Hash::make($request->password);
         $user->phone = $request->phone;

@@ -19,10 +19,10 @@ return new class extends Migration
 
         // Seeders básicos
         \App\Models\Role::create(['name' => 'admin']);
-        \App\Models\Role::create(['name' => 'editor']);
-        \App\Models\Role::create(['name' => 'user']); // Rol por defecto
-        \App\Models\Role::create(['name' => 'guest']);
-        \App\Models\Role::create(['name' => 'superadmin']);
+        \App\Models\Role::create(['name' => 'jefe cerrada']);
+        \App\Models\Role::create(['name' => 'guardia']); 
+        \App\Models\Role::create(['name' => 'jefe de familia']); // Rol por defecto
+        \App\Models\Role::create(['name' => 'familiar']);
 
 
     }
