@@ -37,13 +37,17 @@
     <div class="message-container">
         <h1>¡Autenticación Completada!</h1>
         <p>Estás siendo redirigido a la aplicación principal...</p>
-        <p>Si la redirección no ocurre automáticamente, haz clic <a href="http://localhost:5173">aquí</a>.</p>
+        @if(isset($redirect_url))
+        <p>Si la redirección no ocurre automáticamente, haz clic <a href="{{ $redirect_url }}">aquí</a>.</p>
+        @endif
     </div>
 
     <script>
+        @if(isset($redirect_url))
         setTimeout(function() {
-            window.location.href = 'http://localhost:5173';
-        }, 3000); // Redirige después de 3 segundos
+            window.location.href = '{{ $redirect_url }}';
+        }, 3000);
+        @endif
     </script>
 </body>
 </html>

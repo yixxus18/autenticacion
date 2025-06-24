@@ -16,7 +16,7 @@ class HomeController extends Controller
         $redirectUrl = $request->input('redirect_uri') ?? session('redirect_uri');
         if ($redirectUrl) {
             session()->forget('redirect_uri');
-            return redirect($redirectUrl);
+            return view('home', ['redirect_url' => $redirectUrl]);
         }
         return view('home');
     }
