@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login TecnoGuard</title>
+  <style>
+    body {
+      background: #eaebe7;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 40px;
+      text-align: center;
+      width: 320px;
+    }
+    .btn {
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #139BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .btn.secondary {
+      background-color: #66B2FF;
+    }
+    .logo {
+      max-width: 200px;
+      margin-bottom: 20px;
+      background: none;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .crear-cuenta-title {
+        margin-top: 30px;
+      }
+  </style>
+</head>
+<body>
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <img src="./assets/tecno-guard-logo.png" alt="Logo TecnoGuard" class="logo" style="margin-bottom: 30px; max-width: 220px; background: none; box-shadow: none; border-radius: 0;" />
+    <div class="card">
+      <h2>Inicio de Sesión</h2>
+      <button class="btn" id="loginBtn">Iniciar Sesión</button>
+      <h2 class="crear-cuenta-title">Crear Cuenta</h2>
+      <button class="btn secondary" id="registerBtn">Registrarse</button>
+    </div>
+  </div>
+  <script>
+    const { ipcRenderer } = require('electron');
+    const { checkAuthStatus } = require('./auth-check.js');
+    const AUTH_CONFIG = {
+      tecnoGuardApiUrl: 'http://localhost:8000',
+      publicClientId: '2',
+      electronCallbackUrl: 'http://127.0.0.1:42813/callback',
+    };
+
+    // Verificar token al cargar la página
+    checkAuthStatus(AUTH_CONFIG.tecnoGuardApiUrl, 'dashboard.html');
+
+    function generateRandomString(length) {
+      const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let text = '';
+      for (let i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      return text;
+    }
+
+    function base64urlencode(buffer) {
+      return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+    }
+
+    async function generateCodeChallenge(codeVerifier) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(codeVerifier);
+      const hash = await window.crypto.subtle.digest('SHA-256', data);
+      return base64urlencode(hash);
+    }
+
+    document.getElementById('loginBtn').onclick = async function() {
+      const codeVerifier = generateRandomString(128);
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      localStorage.setItem('pkce_code_verifier', codeVerifier);
+
+      const params = new URLSearchParams({
+        client_id: AUTH_CONFIG.publicClientId,
+        redirect_uri: AUTH_CONFIG.electronCallbackUrl,
+        response_type: 'code',
+        scope: '*',
+        state: generateRandomString(32),
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+      });
+
+      const authUrl = `${AUTH_CONFIG.tecnoGuardApiUrl}/oauth/authorize?${params.toString()}`;
+      ipcRenderer.send('open-auth-window', authUrl);
+    };
+
+    document.getElementById('registerBtn').onclick = function() {
+      const registerUrl = `${AUTH_CONFIG.tecnoGuardApiUrl}/register`;
+      ipcRenderer.send('open-auth-window', registerUrl);
+    };
+
+    ipcRenderer.on('oauth-code', async (event, { code, state }) => {
+      alert('Código recibido: ' + code);
+      const codeVerifier = localStorage.getItem('pkce_code_verifier');
+
+      if (!code || !codeVerifier) {
+        alert('Error: No se encontró el código de autorización o el verificador PKCE.');
+        return;
+      }
+      const formData = new URLSearchParams();
+      formData.append('grant_type', 'authorization_code');
+      formData.append('client_id', AUTH_CONFIG.publicClientId);
+      formData.append('redirect_uri', AUTH_CONFIG.electronCallbackUrl);
+      formData.append('code', code);
+      formData.append('code_verifier', codeVerifier);
+
+      try {
+        const response = await fetch(`${AUTH_CONFIG.tecnoGuardApiUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+          },
+          body: formData,
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+          throw new Error(responseData.message || 'Error al intercambiar el código por el token.');
+        }
+
+        console.log('¡Tokens recibidos!', responseData);
+        alert('¡Login exitoso!');
+        
+        localStorage.setItem('access_token', responseData.access_token);
+        if (responseData.refresh_token) {
+          localStorage.setItem('refresh_token', responseData.refresh_token);
+        }
+        
+        localStorage.removeItem('pkce_code_verifier');
+
+        window.location.href = 'dashboard.html';
+
+      } catch (error) {
+        console.error('Error en el intercambio de token:', error);
+        alert(`Error de autenticación: ${error.message}`);
+      }
+    });
+  </script>
+</body>
+</html>

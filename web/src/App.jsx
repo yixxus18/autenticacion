@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
+
 import './App.css'
 import { AUTH_CONFIG } from './configs/config';
-import { useNavigate } from 'react-router-dom';
 import logo from './assets/tecno-guard-logo.png';
 
 function generateRandomString(length) {
@@ -28,13 +27,12 @@ async function generateCodeChallenge(codeVerifier) {
 }
 
 function App() {
-  const navigate = useNavigate();
 
   const handleLogin = async () => {
     const codeVerifier = generateRandomString(128);
     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-    sessionStorage.setItem('pkce_code_verifier', codeVerifier);
+    localStorage.setItem('pkce_code_verifier', codeVerifier);
 
     const params = new URLSearchParams({
       client_id: AUTH_CONFIG.publicClientId, 
@@ -47,44 +45,14 @@ function App() {
     });
 
     const authUrl = `${AUTH_CONFIG.tecnoGuardApiUrl}/oauth/authorize?${params.toString()}`;
-    
-    window.open(authUrl, 'Login', 'width=600,height=700');
+    // window.open(authUrl, 'Login', 'width=600,height=700');
+    window.location.href = authUrl;
   };
 
   const handleRegister = () => {
     const registerUrl = `${AUTH_CONFIG.tecnoGuardApiUrl}/register`;
-    window.open(registerUrl, 'Register', 'width=600,height=700');
+    window.open(registerUrl, '_blank');
   };
-
-  useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.origin !== AUTH_CONFIG.reactAppOrigin) {
-        console.warn('Mensaje de origen desconocido', event.origin);
-        return;
-      }
-
-      const { type, payload } = event.data;
-
-      if (type === 'AUTH_SUCCESS' && payload.access_token) {
-        localStorage.setItem('access_token', payload.access_token);
-        if (payload.refresh_token) {
-          localStorage.setItem('refresh_token', payload.refresh_token);
-        }
-        if (payload.user_data) {
-          localStorage.setItem('user_data', JSON.stringify(payload.user_data));
-        }
-        navigate('/home');
-      } else if (type === 'AUTH_ERROR' && payload.error) {
-        console.error('Error de autenticación desde pop-up:', payload.error);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [navigate]);
 
   return (
     <div style={{
@@ -141,7 +109,7 @@ function App() {
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <img src={logo} alt="Logo TecnoGuard" style={{ maxWidth: '300px', marginBottom: '20px' }} /> @
+        <img src={logo} alt="Logo TecnoGuard" style={{ maxWidth: '300px', marginBottom: '20px' }} /> 
       </div>
     </div>
   )

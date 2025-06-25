@@ -1,215 +1,118 @@
-import React, { useState, useEffect } from 'react';
-import { AUTH_CONFIG } from '../configs/config';
+import React from 'react';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
-const Home = () => {
-  const [healthResponse, setHealthResponse] = useState(null);
-  const [meResponse, setMeResponse] = useState(null);
-  const [cerradaResponse, setCerradaResponse] = useState(null);
-  const [userData, setUserData] = useState(null);
+const metricas = [
+  {
+    title: 'Total de Usuarios',
+    value: '1,250',
+    icon: <i className="fas fa-user" style={{ fontSize: 32 }}></i>,
+    gradient: 'linear-gradient(90deg, #21e6c1 0%, #1fa2ff 100%)',
+  },
+  {
+    title: 'Puertas Activas',
+    value: '1,250',
+    icon: <i className="fas fa-door-open" style={{ fontSize: 32 }}></i>,
+    gradient: 'linear-gradient(90deg, #f7971e 0%, #ffd200 100%)',
+  },
+  {
+    title: 'Pagos Pendientes',
+    value: '1,250',
+    icon: <i className="fas fa-money-bill-wave" style={{ fontSize: 32 }}></i>,
+    gradient: 'linear-gradient(90deg, #21d4fd 0%, #b721ff 100%)',
+  },
+  {
+    title: 'Accesos Hoy',
+    value: '1,250',
+    icon: <i className="fas fa-door-open" style={{ fontSize: 32 }}></i>,
+    gradient: 'linear-gradient(90deg, #f7971e 0%, #ff5858 100%)',
+  },
+];
 
-  useEffect(() => {
-    const storedUserData = localStorage.getItem('user_data');
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
-    }
-  }, []);
-
-  const fetchHealthData = async () => {
-    try {
-      const response = await fetch(`http://localhost:8001/api/health`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setHealthResponse({ status: response.status, data: data });
-    } catch (error) {
-      console.error('Error al obtener datos de health:', error);
-      setHealthResponse({ status: 'Error', data: error.message });
-    }
-  };
-
-  const fetchMeData = async () => {
-    const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) {
-      setMeResponse({ status: 'Error', data: 'No se encontró el token de acceso.' });
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8000/api/user`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Accept': 'application/json',
-        },
-      });
-      const data = await response.json();
-      console.log(accessToken);
-      setMeResponse({ status: response.status, data: data });
-    } catch (error) {
-      console.error('Error al obtener datos de /me:', error);
-      setMeResponse({ status: 'Error', data: error.message });
-    }
-  };
-
-  const createCerrada = async () => {
-    const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) {
-      setCerradaResponse({ status: 'Error', data: 'No se encontró el token de acceso.' });
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8001/api/v1/jefe-cerrada/guardia`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: 'Cerrada de Prueba',
-          direccion: 'Dirección de prueba',
-        }),
-      });
-      const data = await response.json();
-      setCerradaResponse({ status: response.status, data: data });
-    } catch (error) {
-      console.error('Error al crear cerrada:', error);
-      setCerradaResponse({ status: 'Error', data: error.message });
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_data');
-    window.location.href = '/';
-  };
-
-  return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-      <h1>Bienvenido al Home de la React App</h1>
-      {userData && (
-        <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <h3>Información del Usuario (desde Tecno Guard API):</h3>
-          <p><strong>Nombre:</strong> {userData.name}</p>
-          <p><strong>Email:</strong> {userData.email}</p>
-        </div>
-      )}
-
-      <div style={{ marginBottom: '20px' }}>
-        <h2>Probar API de Autenticación (Puerto 8000)</h2>
-        <button
-          onClick={fetchHealthData}
-          style={{
-            padding: '10px 20px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            backgroundColor: '#17a2b8',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            marginRight: '10px',
-          }}
-        >
-          Probar /health (Pública)
-        </button>
-        <button
-          onClick={fetchMeData}
-          style={{
-            padding: '10px 20px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-          }}
-        >
-          Probar /me (Con Token)
-        </button>
-
-        {healthResponse && (
-          <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #17a2b8', borderRadius: '5px', backgroundColor: '#d1ecf1' }}>
-            <h3>Respuesta /health - Estado: {healthResponse.status}</h3>
-            <pre style={{
-              maxHeight: '300px',
-              overflow: 'auto',
-              background: '#f8f9fa',
-              padding: '10px'
-            }}>
-              {JSON.stringify(healthResponse.data, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        {meResponse && (
-          <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #28a745', borderRadius: '5px', backgroundColor: '#d4edda' }}>
-            <h3>Respuesta /me - Estado: {meResponse.status}</h3>
-            <pre style={{
-              maxHeight: '300px',
-              overflow: 'auto',
-              background: '#f8f9fa',
-              padding: '10px'
-            }}>
-              {JSON.stringify(meResponse.data, null, 2)}
-            </pre>
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginBottom: '20px' }}>
-        <h2>Probar API de Negocio (Puerto 8001)</h2>
-        <button
-          onClick={createCerrada}
-          style={{
-            padding: '10px 20px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            backgroundColor: '#6f42c1',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-          }}
-        >
-          Crear Cerrada (Admin)
-        </button>
-
-        {cerradaResponse && (
-          <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #6f42c1', borderRadius: '5px', backgroundColor: '#e2d9f3' }}>
-            <h3>Respuesta Crear Cerrada - Estado: {cerradaResponse.status}</h3>
-            <pre style={{
-              maxHeight: '300px',
-              overflow: 'auto',
-              background: '#f8f9fa',
-              padding: '10px'
-            }}>
-              {JSON.stringify(cerradaResponse.data, null, 2)}
-            </pre>
-          </div>
-        )}
-      </div>
-
-      <button
-        onClick={handleLogout}
-        style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer',
-          backgroundColor: '#dc3545',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          marginTop: '20px',
-        }}
-      >
-        Cerrar Sesión (React App)
-      </button>
-    </div>
-  );
+const barData = {
+  labels: ['Cerrada 1', 'Cerrada 2', 'Cerrada 3'],
+  datasets: [
+    {
+      label: 'Cerradas más transitadas',
+      data: [80, 60, 70],
+      backgroundColor: '#6ad3e6',
+      borderRadius: 0,
+    },
+  ],
 };
+
+const doughnutData = {
+  labels: ['Red', 'Blue', 'Yellow'],
+  datasets: [
+    {
+      data: [300, 50, 100],
+      backgroundColor: ['#ff6384', '#36a2eb', '#ffce56'],
+      hoverBackgroundColor: ['#ff6384', '#36a2eb', '#ffce56'],
+    },
+  ],
+};
+
+const lineData = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+  datasets: [
+    {
+      label: 'Visitantes',
+      data: [30, 50, 80, 60, 70, 80],
+      fill: false,
+      borderColor: '#36a2eb',
+      tension: 0.4,
+    },
+    {
+      label: 'Accesos',
+      data: [20, 40, 60, 80, 60, 90],
+      fill: false,
+      borderColor: '#8e5ea2',
+      tension: 0.4,
+    },
+  ],
+};
+
+const Home = () => (
+  <div style={{ width: '100%', minHeight: '100%', background: '#eaebe7' }}>
+    {/* Métricas */}
+    <div style={{ display: 'flex', gap: 30, margin: '30px 40px 0 40px', flexWrap: 'wrap' }}>
+      {metricas.map((m, i) => (
+        <div key={i} style={{ flex: 1, background: m.gradient, color: '#fff', borderRadius: 16, padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 180, minHeight: 90 }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>{m.icon}<span style={{ marginLeft: 12, fontWeight: 500 }}>{m.title}</span></div>
+          <div style={{ fontSize: 32, fontWeight: 700 }}>{m.value}</div>
+        </div>
+      ))}
+    </div>
+    {/* Gráficas */}
+    <div style={{ display: 'flex', gap: 30, margin: '30px 40px', flexWrap: 'wrap' }}>
+      <div style={{ flex: 2, background: '#fff', borderRadius: 12, padding: 24, minWidth: 320 }}>
+        <div style={{ fontWeight: 600, marginBottom: 10 }}>Cerradas más transitadas</div>
+        <Bar data={barData} options={{ plugins: { legend: { display: false } } }} height={220} />
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 30 }}>
+        <div style={{ background: '#fff', borderRadius: 12, padding: 24 }}>
+          <Doughnut data={doughnutData} options={{ plugins: { legend: { position: 'top' } } }} height={120} />
+        </div>
+        <div style={{ background: '#fff', borderRadius: 12, padding: 24 }}>
+          <Line data={lineData} options={{ plugins: { legend: { position: 'top' } } }} height={120} />
+        </div>
+      </div>
+    </div>
+    <style>{`
+      @media (max-width: 900px) {
+        .metricas-row, .graficas-row {
+          flex-direction: column !important;
+          gap: 15px !important;
+        }
+      }
+      @media (max-width: 600px) {
+        .metricas-row, .graficas-row {
+          margin: 10px !important;
+          padding: 0 !important;
+        }
+      }
+    `}</style>
+  </div>
+);
 
 export default Home; 

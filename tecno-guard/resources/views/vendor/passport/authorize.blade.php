@@ -83,8 +83,8 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-7 col-lg-6 col-xl-5">
+                <img src="{{ asset('images/tecno-guard-logo.png') }}" alt="Tecno Guard Logo" class="passport-logo">
                 <div class="card card-depth mt-4">
-                    <img src="{{ asset('images/tecno-guard-logo.png') }}" alt="Tecno Guard Logo" class="passport-logo">
                     <div class="card-header">
                         Solicitud de Autorización
                     </div>
