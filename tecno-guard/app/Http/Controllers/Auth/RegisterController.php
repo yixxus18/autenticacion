@@ -38,9 +38,18 @@ class RegisterController extends Controller
         );
 
         if ($validate->fails()) {
-            return back()
-                ->withErrors($validate)
-                ->withInput($request->except(['password', 'ine_front']));
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'validation_failed',
+                    'message' => 'Algunos de los datos proporcionados no son válidos. Por favor, revisa los errores y corrige los campos indicados.',
+                    'data' => [ 'errors' => $validate->errors() ],
+                    'status' => false
+                ], 422);
+            } else {
+                return back()
+                    ->withErrors($validate)
+                    ->withInput($request->except(['password', 'ine_front']));
+            }
         }
 
         $image = $request->file('ine_front');
@@ -62,9 +71,18 @@ class RegisterController extends Controller
             if ($addressData && isset($addressData['value'])) {
                 $address = $addressData['value'];
             } else {
-                return back()
-                    ->withErrors(['ine_front' => 'No se pudo encontrar la dirección en la imagen.'])
-                    ->withInput($request->except(['password', 'ine_front']));
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'error' => 'validation_failed',
+                        'message' => 'No se pudo encontrar la dirección en la imagen.',
+                        'data' => [ 'errors' => ['ine_front' => ['No se pudo encontrar la dirección en la imagen.']] ],
+                        'status' => false
+                    ], 422);
+                } else {
+                    return back()
+                        ->withErrors(['ine_front' => 'No se pudo encontrar la dirección en la imagen.'])
+                        ->withInput($request->except(['password', 'ine_front']));
+                }
             }
         } else {
             $errorMessage = 'Error al procesar la imagen de la INE. Intente de nuevo.';
@@ -72,9 +90,18 @@ class RegisterController extends Controller
             if ($apiError && isset($apiError['message'])) {
                 $errorMessage .= ' Detalle: ' . $apiError['message'];
             }
-            return back()
-                ->withErrors(['ine_front' => $errorMessage])
-                ->withInput($request->except(['password', 'ine_front']));
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'validation_failed',
+                    'message' => $errorMessage,
+                    'data' => [ 'errors' => ['ine_front' => [$errorMessage]] ],
+                    'status' => false
+                ], 422);
+            } else {
+                return back()
+                    ->withErrors(['ine_front' => $errorMessage])
+                    ->withInput($request->except(['password', 'ine_front']));
+            }
         }
 
         $user = new User();
@@ -95,8 +122,16 @@ class RegisterController extends Controller
 
         Mail::to($request->email)->send(new ValidatorEmail($signedroute));
 
-        return redirect()->route('login')
-            ->with('success', 'Se ha enviado un mensaje a tu correo para activar tu cuenta.');
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Usuario registrado exitosamente. Revisa tu correo para activar tu cuenta.',
+                'data' => [ 'user_id' => $user->id ],
+                'status' => 201
+            ], 201);
+        } else {
+            return redirect()->route('login')
+                ->with('success', 'Se ha enviado un mensaje a tu correo para activar tu cuenta.');
+        }
     }
 
     public function activate(User $user)

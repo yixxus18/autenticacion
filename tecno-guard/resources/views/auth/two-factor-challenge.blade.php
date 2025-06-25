@@ -20,7 +20,10 @@
                             @enderror
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Aceptar</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 position-relative" id="twofa-btn">
+                        <span id="twofa-btn-text">Aceptar</span>
+                        <span id="twofa-loader" class="spinner-border spinner-border-sm text-light position-absolute top-50 start-50 translate-middle d-none" role="status" aria-hidden="true"></span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -30,3 +33,51 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form[action=\"{{ route('2fa.verify') }}\"]');
+        const btn = document.getElementById('twofa-btn');
+        const loader = document.getElementById('twofa-loader');
+        const btnText = document.getElementById('twofa-btn-text');
+        if(form) {
+            form.addEventListener('submit', function(e) {
+                btn.disabled = true;
+                loader.classList.remove('d-none');
+                btnText.classList.add('invisible');
+            });
+        }
+    });
+</script>
+<style>
+    #twofa-loader.spinner-border {
+        color: var(--primary-color) !important;
+    }
+    .alert-toast {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        min-width: 320px;
+        z-index: 9999;
+        border-radius: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        padding: 1em 1.5em;
+        background: #f44336;
+        color: #fff;
+        border: none;
+        transition: opacity 0.3s;
+    }
+    .alert-toast-success {
+        background: #43c463 !important;
+        color: #fff !important;
+    }
+    .alert-toast .btn-close {
+        margin-left: auto;
+        filter: invert(1);
+    }
+</style>
+@endpush

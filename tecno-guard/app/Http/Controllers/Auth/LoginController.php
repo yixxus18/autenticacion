@@ -45,9 +45,18 @@ class LoginController extends Controller
             return redirect()->route('2fa.form');
         }
 
-        return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ])->onlyInput('email');
+        if ($request->wantsJson()) {
+            return response()->json([
+                'error' => 'invalid_credentials',
+                'message' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+                'data' => null,
+                'status' => false
+            ], 401);
+        } else {
+            return back()->withErrors([
+                'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+            ])->onlyInput('email');
+        }
     }
 
     public function showTwoFactorForm()

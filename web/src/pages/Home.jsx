@@ -62,7 +62,7 @@ const Home = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8001/api/v1/admin/cerradas`, {
+      const response = await fetch(`http://localhost:8001/api/v1/jefe-cerrada/guardia`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
