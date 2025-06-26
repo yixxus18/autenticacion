@@ -19,7 +19,7 @@ function createMainWindow() {
       contextIsolation: false,
     }
   });
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile('public/index.html');
 }
 
 // Iniciar el servidor para escuchar el callback de OAuth

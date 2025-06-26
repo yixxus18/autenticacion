@@ -47,11 +47,25 @@
     .crear-cuenta-title {
         margin-top: 30px;
       }
+      .centered-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo {
+        margin-bottom: 30px;
+        max-width: 220px;
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+      }
   </style>
 </head>
 <body>
-  <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-    <img src="./assets/tecno-guard-logo.png" alt="Logo TecnoGuard" class="logo" style="margin-bottom: 30px; max-width: 220px; background: none; box-shadow: none; border-radius: 0;" />
+  <div class="centered-container">
+    <img src="./assets/tecno-guard-logo.png" alt="Logo TecnoGuard" class="logo" />
     <div class="card">
       <h2>Inicio de Sesión</h2>
       <button class="btn" id="loginBtn">Iniciar Sesión</button>
@@ -61,10 +75,10 @@
   </div>
   <script>
     const { ipcRenderer } = require('electron');
-    const { checkAuthStatus } = require('./auth-check.js');
+    const { checkAuthStatus } = require('../src/main/auth-check.js');
     const AUTH_CONFIG = {
       tecnoGuardApiUrl: 'http://localhost:8000',
-      publicClientId: '2',
+      publicClientId: '1',
       electronCallbackUrl: 'http://127.0.0.1:42813/callback',
     };
 

@@ -1,6 +1,6 @@
 #root {
-  /* Eliminado: max-width, margin, padding para permitir que el fondo ocupe toda la pantalla */
-  /* text-align: center; */ /* Esto puede ser manejado por el contenedor flex en App.jsx */
+  width: 100%;
+  height: 100%;
 }
 
 .logo {
