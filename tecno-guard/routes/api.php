@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:api')->prefix('v1')->get('/user', function (Request $request) {
-    return $request->user();
+    return response()->json(["message" => "Información del usuario obtenida correctamente", "data" => $request->user(), "status" => true]);
 });
