@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ValidatorEmail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Log;
 class RegisterController extends Controller
 {
     public function __construct()
@@ -56,18 +56,53 @@ class RegisterController extends Controller
         $mimeType = $image->getMimeType();
         $base64Image = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
 
-        $apiKey = env('VERIFICAMEX_API_KEY');
+        // Obtener configuración desde utils.php
+        $verificamexConfig = config('utils.verificamex');
+        $apiKey = $verificamexConfig['api_key'];
 
-        $response = Http::withToken($apiKey)->post('https://api.verificamex.com/identity/v1/ocr/obverse', [
-            'ine_front' => $base64Image,
-        ]);
+        Log::info('API Key: ' . $apiKey);
+        Log::info('API Key length: ' . strlen($apiKey));
+        Log::info('Base64 image length: ' . strlen($base64Image));
+        Log::info('Base64 image preview: ' . substr($base64Image, 0, 100) . '...');
+
+        // Verificar que la API key esté configurada
+        if (!$apiKey) {
+            Log::error('VERIFICAMEX_API_KEY no está configurada');
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'configuration_error',
+                    'message' => 'Error de configuración del servidor. Contacte al administrador.',
+                    'status' => false
+                ], 500);
+            } else {
+                return back()
+                    ->withErrors(['ine_front' => 'Error de configuración del servidor. Contacte al administrador.'])
+                    ->withInput($request->except(['password', 'ine_front']));
+            }
+        }
+
+        // Configurar la petición HTTP con headers apropiados
+        $headers = $verificamexConfig['headers'];
+        $headers['Authorization'] = 'Bearer ' . $apiKey;
+
+        $response = Http::withHeaders($headers)
+            ->timeout($verificamexConfig['timeout'])
+            ->post($verificamexConfig['base_url'] . '/identity/v1/ocr/obverse', [
+                'ine_front' => $base64Image,
+            ]);
+
+        // Log detallado de la respuesta
+        Log::info('Response status: ' . $response->status());
+        Log::info('Response headers: ' . json_encode($response->headers()));
+        Log::info('Response body preview: ' . substr($response->body(), 0, 500));
 
         $address = '';
         if ($response->successful()) {
             $apiResponse = $response->json();
+            Log::info('API Response: ' . json_encode($apiResponse));
             $parseOcr = $apiResponse['data']['parse_ocr'] ?? [];
             $addressData = collect($parseOcr)->firstWhere('type', 'PermanentAddress');
-
+            Log::info('Address data: ' . json_encode($addressData));
             if ($addressData && isset($addressData['value'])) {
                 $address = $addressData['value'];
             } else {
@@ -87,9 +122,15 @@ class RegisterController extends Controller
         } else {
             $errorMessage = 'Error al procesar la imagen de la INE. Intente de nuevo.';
             $apiError = $response->json();
+            Log::error('API Error Response: ' . json_encode($apiError));
+            Log::error('Full response body: ' . $response->body());
+
             if ($apiError && isset($apiError['message'])) {
                 $errorMessage .= ' Detalle: ' . $apiError['message'];
+            } else {
+                $errorMessage .= ' Status: ' . $response->status() . ' - ' . $response->reasonPhrase();
             }
+
             if ($request->wantsJson()) {
                 return response()->json([
                     'error' => 'validation_failed',
@@ -142,5 +183,46 @@ class RegisterController extends Controller
 
         return redirect()->route('login')
             ->with('success', '¡Cuenta activada con éxito! Ahora puedes iniciar sesión.');
+    }
+
+    // Método de prueba para verificar la API
+    public function testApi()
+    {
+        $verificamexConfig = config('utils.verificamex');
+        $apiKey = $verificamexConfig['api_key'];
+
+        if (!$apiKey) {
+            return response()->json([
+                'error' => 'API key no configurada',
+                'message' => 'La variable de entorno VERIFICAMEX_API_KEY no está configurada'
+            ], 500);
+        }
+
+        try {
+            // Petición de prueba simple
+            $headers = $verificamexConfig['headers'];
+            $headers['Authorization'] = 'Bearer ' . $apiKey;
+
+            $response = Http::withHeaders($headers)
+                ->timeout($verificamexConfig['timeout'])
+                ->get($verificamexConfig['base_url'] . '/health');
+
+            return response()->json([
+                'status' => $response->status(),
+                'headers' => $response->headers(),
+                'body' => $response->body(),
+                'successful' => $response->successful(),
+                'api_key_length' => strlen($apiKey),
+                'config_loaded' => !empty($verificamexConfig)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Exception caught',
+                'message' => $e->getMessage(),
+                'api_key_length' => strlen($apiKey),
+                'config_loaded' => !empty($verificamexConfig)
+            ], 500);
+        }
     }
 }
