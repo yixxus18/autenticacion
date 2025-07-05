@@ -52,6 +52,27 @@ class RegisterController extends Controller
             }
         }
 
+        // Verificar si existe un usuario con el número de teléfono que no haya confirmado su email
+        $existingUser = User::where('phone', $request->phone)
+            ->whereNull('email_verified_at')
+            ->first();
+
+        if (!$existingUser) {
+            $errorMessage = 'No tienes autorización para registrarte. Contacta al administrador para que registre tu número de teléfono.';
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => 'unauthorized',
+                    'message' => $errorMessage,
+                    'status' => false
+                ], 403);
+            } else {
+                return back()
+                    ->withErrors(['phone' => $errorMessage])
+                    ->withInput($request->except(['password', 'ine_front']));
+            }
+        }
+
         $image = $request->file('ine_front');
         $mimeType = $image->getMimeType();
         $base64Image = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
@@ -145,20 +166,17 @@ class RegisterController extends Controller
             }
         }
 
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->role_id = 4;
-        $user->is_active = false;
-        $user->password = Hash::make($request->password);
-        $user->phone = $request->phone;
-        $user->direccion = $address;
-        $user->save();
+        // Actualizar el usuario existente en lugar de crear uno nuevo
+        $existingUser->name = $request->name;
+        $existingUser->email = $request->email;
+        $existingUser->password = Hash::make($request->password);
+        $existingUser->direccion = $address;
+        $existingUser->save();
 
         $signedroute = URL::temporarySignedRoute(
             'activate',
             now()->addMinutes(10),
-            ['user' => $user->id]
+            ['user' => $existingUser->id]
         );
 
         Mail::to($request->email)->send(new ValidatorEmail($signedroute));
@@ -166,7 +184,7 @@ class RegisterController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'message' => 'Usuario registrado exitosamente. Revisa tu correo para activar tu cuenta.',
-                'data' => [ 'user_id' => $user->id ],
+                'data' => [ 'user_id' => $existingUser->id ],
                 'status' => 201
             ], 201);
         } else {
