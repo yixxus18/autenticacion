@@ -9,8 +9,10 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            margin: 0;
-            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #d6f8e3;
         }
         .container {
             max-width: 600px;
@@ -18,29 +20,51 @@
             padding: 20px;
         }
         .header {
+            background-color: #8fcabb;
+            color: white;
+            padding: 20px;
             text-align: center;
-            padding: 20px 0;
-            background-color: #f8f9fa;
+            border-radius: 12px 12px 0 0;
         }
         .content {
+            background-color: #fff;
             padding: 20px;
-            background-color: #ffffff;
+            border: 1px solid #8fcabb;
+            border-radius: 0 0 12px 12px;
         }
         .button {
             display: inline-block;
             padding: 12px 24px;
-            background-color: #007bff;
-            color: #ffffff;
+            background-color: #8fcabb;
+            color: #fff !important;
             text-decoration: none;
             border-radius: 5px;
             margin: 20px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .button:hover {
+            background-color: #6ea89e;
         }
         .footer {
             text-align: center;
-            padding: 20px;
+            margin-top: 20px;
             font-size: 12px;
             color: #666;
-            background-color: #f8f9fa;
+            background: #d6f8e3;
+            border-radius: 0 0 12px 12px;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 5px;
+            color: #8fcabb;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border: 2px dashed #8fcabb;
+            border-radius: 8px;
         }
     </style>
 </head>

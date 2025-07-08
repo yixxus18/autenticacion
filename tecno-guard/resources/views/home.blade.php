@@ -11,25 +11,37 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f0f2f5;
+            background-color: #d6f8e3;
             margin: 0;
             text-align: center;
         }
         .message-container {
-            background-color: #ffffff;
+            background-color: #fff;
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(143,202,187,0.15);
             max-width: 500px;
             width: 90%;
+            border: 2px solid #8fcabb;
         }
         h1 {
-            color: #28a745;
+            color: #8fcabb;
             margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: bold;
         }
         p {
             color: #333;
             font-size: 1.1em;
+        }
+        a {
+            color: #8fcabb;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        a:hover {
+            color: #5e8e7a;
+            text-decoration: none;
         }
     </style>
 </head>
