@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('direccion_verified')->nullable();
             $table->string('code', 255)->nullable();
             $table->unsignedBigInteger('role_id')->default(4);
-            $table->boolean('two_factor_enabled')->default(false);
+            $table->boolean('two_factor_enabled')->default(true);
             $table->string('two_factor_code')->nullable();
             $table->timestamp('two_factor_expires_at')->nullable();
             $table->rememberToken();
