@@ -42,6 +42,8 @@
                 <span>@ 2025, by Tecno Team :)</span>
                 <br>
                 <span>¿No tienes una cuenta? <a href="{{ route('register') }}" class="auth-link">Regístrate aquí</a></span>
+                <br>
+                <span><a href="{{ route('password.request') }}" class="auth-link">¿Olvidaste tu contraseña?</a></span>
             </div>
         </div>
     </div>

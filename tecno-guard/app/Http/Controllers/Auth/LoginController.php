@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Mail\TwoFactorCodeMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
@@ -111,5 +112,99 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetCode(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $code = random_int(100000, 999999);
+        $user = User::where('email', $request->email)->first();
+        $user->update(['two_factor_code' => $code, 'two_factor_expires_at' => now()->addMinutes(10)]);
+
+        Mail::to($user->email)->send(new TwoFactorCodeMail($user, $code));
+
+        return redirect()->route('password.verify.form')->with('email', $request->email);
+    }
+
+    public function showVerifyCodeForm()
+    {
+        if (!session()->has('email')) {
+            return redirect()->route('password.request');
+        }
+        return view('auth.verify-code');
+    }
+
+    public function verifyResetCode(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|numeric',
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)
+                   ->where('two_factor_code', $request->code)
+                   ->where('two_factor_expires_at', '>', now())
+                   ->first();
+
+        if (!$user) {
+            return back()->withErrors(['code' => 'Código inválido o expirado']);
+        }
+
+        return redirect()->route('password.reset')->with([
+            'email' => $user->email,
+            'code' => $request->code
+        ]);
+    }
+
+    public function showResetPasswordForm()
+    {
+        if (!session()->has('email') || !session()->has('code')) {
+            return redirect()->route('password.request');
+        }
+        return view('auth.reset-password');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|numeric',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        $user = User::where('email', $request->email)
+                   ->where('two_factor_code', $request->code)
+                   ->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Usuario no encontrado']);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+            'two_factor_code' => null,
+            'two_factor_expires_at' => null
+        ]);
+
+        return redirect()->route('login')->with('status', 'Contraseña actualizada correctamente');
+    }
+
+    public function resendResetCode(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $code = random_int(100000, 999999);
+        $user = User::where('email', $request->email)->first();
+        $user->update(['two_factor_code' => $code, 'two_factor_expires_at' => now()->addMinutes(10)]);
+
+        Mail::to($user->email)->send(new TwoFactorCodeMail($user, $code));
+
+        return response()->json(['success' => true]);
     }
 }

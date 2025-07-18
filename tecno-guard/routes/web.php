@@ -34,3 +34,12 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/2fa', [LoginController::class, 'showTwoFactorForm'])->name('2fa.form');
 Route::post('/2fa', [LoginController::class, 'verifyTwoFactor'])->name('2fa.verify');
 
+// Rutas para restablecimiento de contraseña
+Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [LoginController::class, 'sendResetCode'])->name('password.email');
+Route::get('/verify-code', [LoginController::class, 'showVerifyCodeForm'])->name('password.verify.form');
+Route::post('/verify-code', [LoginController::class, 'verifyResetCode'])->name('password.verify');
+Route::get('/reset-password', [LoginController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [LoginController::class, 'updatePassword'])->name('password.update');
+Route::post('/resend-code', [LoginController::class, 'resendResetCode'])->name('password.resend');
+
