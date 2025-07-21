@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+.roo/mcp.json
+.roo
+mcp.json

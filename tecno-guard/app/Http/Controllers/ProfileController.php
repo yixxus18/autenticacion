@@ -41,24 +41,4 @@ class ProfileController extends Controller
             'status' => true
         ], 200);
     }
-
-    public function changePassword(Request $request)
-    {
-        $user = $request->user();
-
-        $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
-
-        $user->update([
-            'password' => Hash::make($request->password)
-        ]);
-
-        return response()->json([
-            'message' => 'Contraseña actualizada correctamente',
-            'data' => [],
-            'status' => true
-        ], 200);
-    }
 }

@@ -18,6 +18,5 @@ use App\Http\Controllers\ProfileController;
 Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::get('/me', [ProfileController::class, 'me']);
     Route::put('/profile', [ProfileController::class, 'updateProfile']);
-    Route::post('/change-password', [ProfileController::class, 'changePassword']);
 });
 
