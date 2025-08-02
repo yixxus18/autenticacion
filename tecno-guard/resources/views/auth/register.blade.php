@@ -15,6 +15,14 @@
                 @csrf
 
                 <div class="mb-2">
+                    <label for="name" class="auth-label">Nombre Completo</label>
+                    <div class="auth-input-group">
+                        <span class="auth-input-icon"><i class="fa-regular fa-user"></i></span>
+                        <input id="name" type="text" class="auth-input @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus placeholder="Nombre Apellido">
+                    </div>
+                </div>
+
+                <div class="mb-2">
                     <label for="email" class="auth-label">Email</label>
                     <div class="auth-input-group">
                         <span class="auth-input-icon"><i class="fa-regular fa-envelope"></i></span>

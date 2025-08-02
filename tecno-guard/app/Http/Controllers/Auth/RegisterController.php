@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\VerificamexService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
@@ -14,9 +15,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 class RegisterController extends Controller
 {
-    public function __construct()
+    protected $verificamexService;
+
+    public function __construct(VerificamexService $verificamexService)
     {
         $this->middleware('guest');
+        $this->verificamexService = $verificamexService;
     }
 
     public function showRegistrationForm()
@@ -77,38 +81,13 @@ class RegisterController extends Controller
         $mimeType = $image->getMimeType();
         $base64Image = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
 
-        // Obtener configuración desde utils.php
-        $verificamexConfig = config('utils.verificamex');
-        $apiKey = $verificamexConfig['api_key'];
+        $headers = $this->verificamexService->getAuthHeaders();
+        $baseUrl = $this->verificamexService->getBaseUrl();
 
-        Log::info('API Key: ' . $apiKey);
-        Log::info('API Key length: ' . strlen($apiKey));
-        Log::info('Base64 image length: ' . strlen($base64Image));
-        Log::info('Base64 image preview: ' . substr($base64Image, 0, 100) . '...');
-
-        // Verificar que la API key esté configurada
-        if (!$apiKey) {
-            Log::error('VERIFICAMEX_API_KEY no está configurada');
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'error' => 'configuration_error',
-                    'message' => 'Error de configuración del servidor. Contacte al administrador.',
-                    'status' => false
-                ], 500);
-            } else {
-                return back()
-                    ->withErrors(['ine_front' => 'Error de configuración del servidor. Contacte al administrador.'])
-                    ->withInput($request->except(['password', 'ine_front']));
-            }
-        }
-
-        // Configurar la petición HTTP con headers apropiados
-        $headers = $verificamexConfig['headers'];
-        $headers['Authorization'] = 'Bearer ' . $apiKey;
-
-        $response = Http::withHeaders($headers)
-            ->timeout($verificamexConfig['timeout'])
-            ->post($verificamexConfig['base_url'] . '/identity/v1/ocr/obverse', [
+        $response = Http::withoutVerifying()
+            ->withHeaders($headers)
+            ->timeout(30) // Opcional: puedes obtenerlo del servicio si lo necesitas
+            ->post($baseUrl . '/identity/v1/ocr/obverse', [
                 'ine_front' => $base64Image,
             ]);
 
@@ -206,40 +185,25 @@ class RegisterController extends Controller
     // Método de prueba para verificar la API
     public function testApi()
     {
-        $verificamexConfig = config('utils.verificamex');
-        $apiKey = $verificamexConfig['api_key'];
-
-        if (!$apiKey) {
-            return response()->json([
-                'error' => 'API key no configurada',
-                'message' => 'La variable de entorno VERIFICAMEX_API_KEY no está configurada'
-            ], 500);
-        }
-
         try {
-            // Petición de prueba simple
-            $headers = $verificamexConfig['headers'];
-            $headers['Authorization'] = 'Bearer ' . $apiKey;
+            $headers = $this->verificamexService->getAuthHeaders();
+            $baseUrl = $this->verificamexService->getBaseUrl();
 
             $response = Http::withHeaders($headers)
-                ->timeout($verificamexConfig['timeout'])
-                ->get($verificamexConfig['base_url'] . '/health');
+                ->timeout(30)
+                ->get($baseUrl . '/health');
 
             return response()->json([
                 'status' => $response->status(),
                 'headers' => $response->headers(),
-                'body' => $response->body(),
+                'body' => $response->json(), // Usar json() para una mejor visualización
                 'successful' => $response->successful(),
-                'api_key_length' => strlen($apiKey),
-                'config_loaded' => !empty($verificamexConfig)
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Exception caught',
                 'message' => $e->getMessage(),
-                'api_key_length' => strlen($apiKey),
-                'config_loaded' => !empty($verificamexConfig)
             ], 500);
         }
     }

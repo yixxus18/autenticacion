@@ -22,29 +22,4 @@ return [
         ]
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Helper Functions
-    |--------------------------------------------------------------------------
-    |
-    | Funciones auxiliares para el manejo de APIs
-    |
-    */
-
-    'get_verificamex_config' => function() {
-        return [
-            'api_key' => config('utils.verificamex.api_key'),
-            'base_url' => config('utils.verificamex.base_url'),
-            'timeout' => config('utils.verificamex.timeout'),
-            'headers' => config('utils.verificamex.headers')
-        ];
-    },
-
-    'get_verificamex_headers' => function() {
-        $config = config('utils.verificamex');
-        $headers = $config['headers'];
-        $headers['Authorization'] = 'Bearer ' . $config['api_key'];
-        return $headers;
-    }
-
 ];
