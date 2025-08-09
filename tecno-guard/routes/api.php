@@ -18,5 +18,14 @@ use App\Http\Controllers\ProfileController;
 Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::get('/me', [ProfileController::class, 'me']);
     Route::put('/profile', [ProfileController::class, 'updateProfile']);
+
+    Route::post('/logout', function (Request $request) {
+        $request->user()->token()->revoke();
+        DB::table('oauth_refresh_tokens')
+            ->where('access_token_id', $request->user()->token()->id)
+            ->update(['revoked' => true]);
+
+        return response()->json(['message' => 'Logged out successfully']);
+    });
 });
 
