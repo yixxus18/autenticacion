@@ -54,11 +54,20 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="ine_front" class="auth-label">Credencial</label>
+                <div class="mb-2">
+                    <label for="ine_front" class="auth-label">Credencial INE (Frente)</label>
                     <div class="auth-input-group">
                         <span class="auth-input-icon"><i class="fa-regular fa-id-card"></i></span>
-                        <input id="ine_front" type="file" class="auth-input file @error('ine_front') is-invalid @enderror" name="ine_front" required>
+                        <input id="ine_front" type="file" class="auth-input file @error('ine_front') is-invalid @enderror" name="ine_front" required accept="image/*">
+                    </div>
+                    <small class="text-muted">Sube una imagen clara del frente de tu INE</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="direccion" class="auth-label">Dirección (como aparece en tu INE)</label>
+                    <div class="auth-input-group">
+                        <span class="auth-input-icon"><i class="fa-solid fa-location-dot"></i></span>
+                        <input id="direccion" type="text" class="auth-input @error('direccion') is-invalid @enderror" name="direccion" value="{{ old('direccion') }}" required placeholder="Calle, Número, Colonia, Ciudad, Estado">
                     </div>
                 </div>
 
