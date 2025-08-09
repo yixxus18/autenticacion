@@ -30,7 +30,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Información del usuario obtenida correctamente',
-            'data' => ['user' => $user],
+            'data' => $user,
             'status' => true
         ], 200);
     }
